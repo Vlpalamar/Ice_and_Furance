@@ -54,4 +54,9 @@ public class GameManager : MonoBehaviour
     {
         ropeButtn.SetActive(false);
     }
+
+    public void GoToNextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
+    }
 }

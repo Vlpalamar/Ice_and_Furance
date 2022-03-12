@@ -9,6 +9,7 @@ TagManager:
   - spike
   - enemy_point
   - ground
+  - Furance
   layers:
   - Default
   - TransparentFX

@@ -176,7 +176,6 @@ public class Character : MonoBehaviour
                 
                 if (Input.GetKey(KeyCode.Space) && isReadyToExitLadder)
                 {
-
                     JumpFromLadder();
                     break;
                 }
@@ -217,7 +216,9 @@ public class Character : MonoBehaviour
                 }
             }
             break;
-
+            case TagManager.FURANCE:
+            CompleteLevel();
+            break;
 
 
 
@@ -272,5 +273,10 @@ public class Character : MonoBehaviour
         isCorrect = true;
     }
 
+    private void CompleteLevel()
+    {
+        if(iceTaken)
+        GameManager.instance.GoToNextLevel();
+    }
 
 }
