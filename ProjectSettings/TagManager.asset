@@ -8,6 +8,7 @@ TagManager:
   - ladder
   - spike
   - enemy_point
+  - ground
   layers:
   - Default
   - TransparentFX

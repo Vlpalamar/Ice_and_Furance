@@ -25,6 +25,7 @@ public class TagManager : MonoBehaviour
     public const string ENEMY_POINT="enemy_point";
     public const string PLAYER="Player";
     public const string ICE="Ice";
+    public const string GROUND="ground";
  
 
 

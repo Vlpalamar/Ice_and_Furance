@@ -10,6 +10,7 @@ public class Character : MonoBehaviour
     // references
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    private Animator anim;
     //-----------------------------------------------------------
 
     //общее 
@@ -49,7 +50,7 @@ public class Character : MonoBehaviour
     [Header("IceVars")]
     [SerializeField] private Sprite spriteHeroWithIce;
 
-    private bool isReadyToTakeIce;
+    [SerializeField] private bool isReadyToTakeIce;
 
     private bool iceTaken=false;
     
@@ -57,7 +58,7 @@ public class Character : MonoBehaviour
     [Tooltip("на сколько уменьшится скорость после поднятия льда")] 
     [SerializeField]private float speedReduce;
 
-    private float IceTimer;
+   [SerializeField] private float IceTimer;
 
     [Tooltip("сколько времени нужно для того что бы взять лед")] 
     [SerializeField] private float TimeToTakeIce; 
@@ -68,25 +69,21 @@ public class Character : MonoBehaviour
     {
         this.rb= GetComponent<Rigidbody2D>();
        this.sr= GetComponent<SpriteRenderer>();
+       this.anim= GetComponent<Animator>();
          
     }
 
     // Update is called once per frame
     void Update()
     {
-        horizontalMove=0;
-        if(!isOnLadder)
-        {
-            horizontalMove= Input.GetAxisRaw("Horizontal")*speed*10;
-        }
-        if(horizontalMove<0)
-            sr.flipX=true;
-        if(horizontalMove>0)
-            sr.flipX= false;
-            
+      
+        Move();
+
          if(Input.GetKeyDown(KeyCode.Space))
             Jump();
     }
+
+  
 
     void FixedUpdate()
     {
@@ -98,16 +95,41 @@ public class Character : MonoBehaviour
        
         
     }
-    void Jump()
+      private void Move()
+    {
+        horizontalMove=0;
+        if(!isOnLadder)
+        {
+            horizontalMove= Input.GetAxisRaw("Horizontal")*speed*10;
+             anim.SetFloat("horizontalMove",Mathf.Abs(horizontalMove));
+        }
+        if(horizontalMove<0)
+            sr.flipX=true;
+        if(horizontalMove>0)
+            sr.flipX= false;
+
+    }
+    void Jump(int multiply = 1)
     {
         CheckIsGround();
-        if(onGround)
+        if(onGround|| isOnLadder)
         { 
             //анимация 
-            rb.AddForce( Vector2.up*jumpForce);
+           
+            rb.AddForce( Vector2.up*jumpForce* multiply);
 
         }
        
+    }
+
+    void JumpFromLadder(float multiply=0.5f)
+    {
+        isReadyToExitLadder = false;
+        OnLadderExit();
+        if (targetVelocity.y < 0)
+            multiply = multiply *2.5f;
+        rb.AddForce(Vector2.up * jumpForce * multiply);
+
     }
 
     void CheckIsGround()
@@ -132,32 +154,40 @@ public class Character : MonoBehaviour
             default:
             break;
         }
-
-        
-
     }
 
-    private void Death()
+
+
+    public void Death()
     {
         //анимация 
         GameManager.instance.Death();
 
     }
 
- 
 
+    private bool isReadyToExitLadder=true;//флаг
     private void OnTriggerStay2D(Collider2D other)
     {
      
         switch (other.tag)
         {
             case TagManager.LADDER:
-            // rb.velocity=Vector2.zero;
+                
+                if (Input.GetKey(KeyCode.Space) && isReadyToExitLadder)
+                {
+
+                    JumpFromLadder();
+                    break;
+                }
+               
+                // rb.velocity=Vector2.zero;
             targetVelocity.y= Input.GetAxisRaw("Vertical");
             if(targetVelocity.y!=0)
             {
-                
-                isOnLadder= true;
+
+                isReadyToExitLadder = true;
+                isOnLadder = true;
                 rb.bodyType=RigidbodyType2D.Kinematic;
                 CenterOnLadder(other.bounds.center.x);
                 rb.velocity=targetVelocity*ladderSpeed;
@@ -169,13 +199,14 @@ public class Character : MonoBehaviour
             case TagManager.ICE:
             if(isReadyToTakeIce)
             {
-                if(Input.anyKey)
+                IceTimer += Time.deltaTime;
+                if (Input.anyKey)
                 {
                     isReadyToTakeIce= false;
                     IceTimer=0;
                     GameManager.instance.ShowButton();
                 } 
-                IceTimer+=Time.deltaTime;
+               
                 if(IceTimer>=TimeToTakeIce)   //поднятие льда 
                 {
                     sr.sprite=spriteHeroWithIce;
@@ -199,11 +230,9 @@ public class Character : MonoBehaviour
     {
         switch (other.tag)
         {
-            case TagManager.LADDER:
-            isOnLadder= false;
-            rb.bodyType=RigidbodyType2D.Dynamic;
-            isCorrect=true;
-            break;
+            case TagManager.LADDER: 
+                OnLadderExit();
+                break;
             
             case TagManager.ICE:
             GameManager.instance.HideButton();
@@ -231,8 +260,16 @@ public class Character : MonoBehaviour
 
     public void ReadyToTakeIce()
     {
-        rb.velocity=Vector2.zero;
+        //rb.velocity=Vector2.zero;
         isReadyToTakeIce= true;
+    }
+
+    private void OnLadderExit()
+    {
+       // targetVelocity.y = 0; 
+        isOnLadder = false;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        isCorrect = true;
     }
 
 

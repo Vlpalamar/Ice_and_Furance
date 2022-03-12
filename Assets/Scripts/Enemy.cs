@@ -14,7 +14,7 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         this.EnemyPosition= GetComponent<Transform>();
-        print(transforms.Count);
+        //print(transforms.Count);
     }
 
     // Update is called once per frame
