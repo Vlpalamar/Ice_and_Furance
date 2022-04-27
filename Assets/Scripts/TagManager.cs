@@ -26,8 +26,9 @@ public class TagManager : MonoBehaviour
     public const string PLAYER="Player";
     public const string ICE="Ice";
     public const string GROUND="ground";
-      public const string FURANCE="Furance";
- 
+    public const string FURANCE="Furance";
+    public const string SPRING = "Spring";
+
 
 
 }

@@ -150,12 +150,26 @@ public class Character : MonoBehaviour
             GameManager.instance.ShowButton();
             break;
 
+          
 
             default:
             break;
         }
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+
+        switch (collision.collider.tag)
+        {
+            case TagManager.SPRING:
+                Spring spring = collision.collider.GetComponent<Spring>();
+                this.rb.AddForce(Vector2.up * spring.JumpForce, ForceMode2D.Impulse);
+                spring.DoAnim();
+                break;
+        }
+
+    }
 
 
     public void Death()
